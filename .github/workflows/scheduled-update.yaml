@@ -1,0 +1,92 @@
+name: Scheduled Update Check
+
+on:
+  schedule:
+    # Run weekly on Monday at 2 AM UTC
+    - cron: '0 2 * * 1'
+  workflow_dispatch:
+    inputs:
+      force_build:
+        description: 'Force rebuild even if no updates'
+        required: false
+        default: false
+        type: boolean
+
+jobs:
+  check-updates:
+    runs-on: ubuntu-latest
+    outputs:
+      needs_update: ${{ steps.check.outputs.needs_update }}
+      wordpress_version: ${{ steps.check.outputs.wordpress_version }}
+      php_version: ${{ steps.check.outputs.php_version }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check for updates
+        id: check
+        run: |
+          # Get latest WordPress version info from Docker Hub
+          LATEST_WP_TAG=$(curl -s https://hub.docker.com/v2/repositories/library/wordpress/tags/?page_size=10 | \
+            jq -r '.results[] | select(.name == "latest") | .name')
+
+          # Get the PHP version from latest tag
+          LATEST_PHP_INFO=$(curl -s https://hub.docker.com/v2/repositories/library/wordpress/tags/?page_size=10 | \
+            jq -r '.results[] | select(.name == "latest") | .aliases[]' | \
+            grep -E 'php[0-9]+\.[0-9]+' | \
+            head -1)
+
+          # Extract PHP version
+          if [[ -n "$LATEST_PHP_INFO" ]]; then
+            PHP_VERSION=$(echo "$LATEST_PHP_INFO" | grep -oE '[0-9]+\.[0-9]+')
+          else
+            PHP_VERSION="8.3"  # Default fallback
+          fi
+
+          # Get current base image from Dockerfile
+          CURRENT_BASE=$(grep "FROM wordpress:" Dockerfile | cut -d' ' -f2)
+
+          echo "Current base image: $CURRENT_BASE"
+          echo "Latest WordPress: $LATEST_WP_TAG (PHP $PHP_VERSION)"
+
+          # For this workflow, we always check if there are security updates
+          # by forcing a rebuild weekly
+          NEEDS_UPDATE=true
+
+          # Force build if requested
+          if [[ "${{ github.event.inputs.force_build }}" == "true" ]]; then
+            echo "Force build requested"
+            NEEDS_UPDATE=true
+          fi
+
+          echo "needs_update=$NEEDS_UPDATE" >> $GITHUB_OUTPUT
+          echo "wordpress_version=$LATEST_WP_TAG" >> $GITHUB_OUTPUT
+          echo "php_version=$PHP_VERSION" >> $GITHUB_OUTPUT
+
+  update-and-build:
+    needs: check-updates
+    if: needs.check-updates.outputs.needs_update == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GH_PAT }}
+
+      - name: Create release tag
+        run: |
+          # Generate version based on date
+          DATE=$(date +%Y%m%d)
+          PHP_VERSION="${{ needs.check-updates.outputs.php_version }}"
+          TAG="v${PHP_VERSION}-${DATE}"
+
+          # Check if tag already exists
+          if git ls-remote --tags origin | grep -q "refs/tags/$TAG"; then
+            echo "Tag $TAG already exists, adding timestamp"
+            TIMESTAMP=$(date +%H%M%S)
+            TAG="v${PHP_VERSION}-${DATE}-${TIMESTAMP}"
+          fi
+
+          git tag $TAG
+          git push origin $TAG
+
+          echo "Created release tag: $TAG"
+          echo "This will trigger the release workflow to build multi-arch images"
