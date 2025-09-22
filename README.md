@@ -21,8 +21,8 @@ Production-ready WordPress image with Redis support and optimized PHP settings f
 # Pull from Docker Hub
 docker pull cloudbedrock/cribops-wp:latest
 
-# Or pull from Amazon ECR Public
-docker pull public.ecr.aws/cloudbedrock/cribops-wp:latest
+# Or pull from GitHub Container Registry
+docker pull ghcr.io/cloudbedrock/cribops-wp:latest
 ```
 
 ## Usage
@@ -140,8 +140,8 @@ All standard WordPress environment variables are supported:
 ## Building from Source
 
 ```bash
-git clone https://github.com/CloudBedrock/wordpress-docker.git
-cd wordpress-docker
+git clone https://github.com/cloudbedrock/cribops-wp.git
+cd cribops-wp
 docker build -t cribops-wp:custom .
 ```
 

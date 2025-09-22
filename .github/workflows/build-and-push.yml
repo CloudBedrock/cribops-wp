@@ -17,7 +17,7 @@ on:
 
 env:
   DOCKER_HUB_REPOSITORY: cloudbedrock/cribops-wp
-  AWS_REGION: us-east-1  # Public ECR is only in us-east-1
+  GHCR_REPOSITORY: ghcr.io/cloudbedrock/cribops-wp
 
 jobs:
   build-and-push:
@@ -32,36 +32,15 @@ jobs:
       - name: Log in to Docker Hub
         uses: docker/login-action@v3
         with:
-          username: ${{ secrets.DOCKER_HUB_USERNAME }}
-          password: ${{ secrets.DOCKER_HUB_TOKEN }}
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PAT }}
 
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v4
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
         with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ env.AWS_REGION }}
-
-      - name: Login to Amazon ECR Public
-        id: login-ecr-public
-        uses: aws-actions/amazon-ecr-login@v2
-        with:
-          registry-type: public
-
-      - name: Create ECR Public repository if it doesn't exist
-        run: |
-          aws ecr-public describe-repositories --repository-names cribops-wp --region us-east-1 || \
-          aws ecr-public create-repository \
-            --repository-name cribops-wp \
-            --region us-east-1 \
-            --catalog-data '{
-              "description": "CribOps WordPress with Redis and optimized PHP settings",
-              "architectures": ["x86_64", "arm64"],
-              "operatingSystems": ["Linux"],
-              "logoImageBlob": "",
-              "aboutText": "Production-ready WordPress image with Redis support, optimized for Object Cache Pro",
-              "usageText": "docker pull public.ecr.aws/cloudbedrock/cribops-wp:latest"
-            }'
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GH_PAT }}
 
       - name: Extract metadata
         id: meta
@@ -69,7 +48,7 @@ jobs:
         with:
           images: |
             ${{ env.DOCKER_HUB_REPOSITORY }}
-            ${{ steps.login-ecr-public.outputs.registry }}/cloudbedrock/cribops-wp
+            ${{ env.GHCR_REPOSITORY }}
           tags: |
             type=ref,event=branch
             type=ref,event=pr
@@ -94,7 +73,7 @@ jobs:
       - name: Update Docker Hub description
         uses: peter-evans/dockerhub-description@v3
         with:
-          username: ${{ secrets.DOCKER_HUB_USERNAME }}
-          password: ${{ secrets.DOCKER_HUB_TOKEN }}
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PAT }}
           repository: ${{ env.DOCKER_HUB_REPOSITORY }}
           readme-filepath: ./README.md
