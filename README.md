@@ -4,7 +4,7 @@ Production-ready WordPress image with Redis support and optimized PHP settings f
 
 ## Features
 
-- **WordPress 8.2** with Apache
+- **WordPress (latest) with PHP 8.3** and Apache
 - **Redis PHP Extension** with igbinary and zstd compression
 - **APCu** for local object caching
 - **Optimized PHP Settings**:
@@ -133,7 +133,7 @@ All standard WordPress environment variables are supported:
 
 ## Tags
 
-- `latest`, `php8.2-redis` - Latest stable build with PHP 8.2
+- `latest`, `php8.3-redis` - Latest stable build with PHP 8.3
 - `vX.Y.Z` - Specific version releases
 - `main-<sha>` - Development builds from main branch
 

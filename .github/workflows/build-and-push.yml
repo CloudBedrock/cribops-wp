@@ -56,7 +56,7 @@ jobs:
             type=semver,pattern={{major}}.{{minor}}
             type=semver,pattern={{major}}
             type=raw,value=latest,enable={{is_default_branch}}
-            type=raw,value=php8.2-redis,enable={{is_default_branch}}
+            type=raw,value=php8.3-redis,enable={{is_default_branch}}
             type=sha,prefix={{branch}}-
 
       - name: Build and push Docker image

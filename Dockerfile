@@ -1,6 +1,6 @@
 # CribOps WordPress Image with Redis Support
 # Optimized for production use with all required PHP extensions
-FROM wordpress:php8.2-apache
+FROM wordpress:latest
 
 LABEL maintainer="CloudBedrock <support@cloudbedrock.com>"
 LABEL description="WordPress with Redis, optimized PHP settings, and Object Cache Pro support"
