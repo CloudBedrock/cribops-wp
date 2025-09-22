@@ -151,8 +151,9 @@ This Docker image is open source and available under the MIT License.
 
 ## Support
 
-For issues and feature requests, please visit: https://github.com/CloudBedrock/wordpress-docker/issues
+For issues and feature requests, please visit: https://github.com/CloudBedrock/cribops-wp/issues
 
 ## Credits
 
-Maintained by [CloudBedrock](https://cloudbedrock.com) for the CribOps platform.
+
+Maintained by [CloudBedrock / CribOps](https://cribops.com) for the CribOps platform.
