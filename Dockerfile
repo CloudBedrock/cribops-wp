@@ -4,7 +4,7 @@ FROM wordpress:latest
 
 LABEL maintainer="CloudBedrock <support@cloudbedrock.com>"
 LABEL description="WordPress with Redis, optimized PHP settings, and Object Cache Pro support"
-LABEL version="1.0.0"
+LABEL version="1.0.2"
 
 # Install Redis extension with dependencies
 RUN set -ex; \
