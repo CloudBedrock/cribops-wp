@@ -4,12 +4,12 @@ FROM wordpress:latest
 
 LABEL maintainer="CloudBedrock <support@cloudbedrock.com>"
 LABEL description="WordPress with Redis, optimized PHP settings, and Object Cache Pro support"
-LABEL version="1.0.2"
+LABEL version="1.0.3"
 
-# Install Redis extension with dependencies
+# Install Redis extension with dependencies and debugging tools
 RUN set -ex; \
     apt-get update; \
-    apt-get install -y libzstd-dev; \
+    apt-get install -y libzstd-dev vim less curl; \
     pecl install igbinary; \
     pecl install --configureoptions 'enable-redis-igbinary="yes" enable-redis-zstd="yes"' redis; \
     pecl install apcu; \
@@ -17,6 +17,11 @@ RUN set -ex; \
     docker-php-ext-install -j$(nproc) bcmath sockets; \
     apt-get clean; \
     rm -rf /var/lib/apt/lists/* /tmp/pear
+
+# Install WP-CLI
+RUN curl -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar \
+    && chmod +x wp-cli.phar \
+    && mv wp-cli.phar /usr/local/bin/wp
 
 # Create optimized PHP configuration
 RUN { \
