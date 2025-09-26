@@ -4,7 +4,7 @@ FROM wordpress:latest
 
 LABEL maintainer="CloudBedrock <support@cloudbedrock.com>"
 LABEL description="WordPress with Redis, optimized PHP settings, and Object Cache Pro support"
-LABEL version="1.0.1"
+LABEL version="1.0.0"
 
 # Install Redis extension with dependencies
 RUN set -ex; \
@@ -56,12 +56,6 @@ RUN a2enmod expires headers rewrite
 # Verify Redis is installed
 RUN php -m | grep -q redis || exit 1
 
-# Add custom entrypoint to process WORDPRESS_CONFIG_EXTRA
-COPY docker-entrypoint-cribops.sh /usr/local/bin/
-RUN chmod +x /usr/local/bin/docker-entrypoint-cribops.sh
-
 WORKDIR /var/www/html
 
-# Use custom entrypoint that processes WORDPRESS_CONFIG_EXTRA
-ENTRYPOINT ["docker-entrypoint-cribops.sh"]
 CMD ["apache2-foreground"]
