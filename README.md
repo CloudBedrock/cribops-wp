@@ -30,7 +30,6 @@ docker pull ghcr.io/cloudbedrock/cribops-wp:latest
 ### Basic WordPress Setup
 
 ```yaml
-version: '3.8'
 services:
   wordpress:
     image: cloudbedrock/cribops-wp:latest
@@ -62,7 +61,6 @@ volumes:
 ### With Redis Cache
 
 ```yaml
-version: '3.8'
 services:
   wordpress:
     image: cloudbedrock/cribops-wp:latest
@@ -157,3 +155,4 @@ For issues and feature requests, please visit: https://github.com/CloudBedrock/c
 
 
 Maintained by [CloudBedrock / CribOps](https://cribops.com) for the CribOps platform.
+
