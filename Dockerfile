@@ -14,7 +14,7 @@ RUN set -ex; \
     pecl install --configureoptions 'enable-redis-igbinary="yes" enable-redis-zstd="yes"' redis; \
     pecl install apcu; \
     docker-php-ext-enable igbinary redis apcu; \
-    docker-php-ext-install -j$(nproc) bcmath sockets; \
+    docker-php-ext-install -j$(nproc) pdo pdo_mysql mysqli bcmath sockets; \
     apt-get clean; \
     rm -rf /var/lib/apt/lists/* /tmp/pear
 
@@ -58,8 +58,10 @@ RUN { \
 # Enable Apache modules for better performance
 RUN a2enmod expires headers rewrite
 
-# Verify Redis is installed
-RUN php -m | grep -q redis || exit 1
+# Verify required extensions are installed
+RUN php -m | grep -q redis || exit 1; \
+    php -m | grep -q pdo_mysql || exit 1; \
+    php -m | grep -q mysqli || exit 1
 
 WORKDIR /var/www/html
 
