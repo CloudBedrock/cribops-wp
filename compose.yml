@@ -1,0 +1,97 @@
+services:
+  wordpress:
+    image: cloudbedrock/cribops-wp:latest
+    depends_on:
+      - db
+      - redis
+    ports:
+      - "8090:80"
+    environment:
+      # PHP Configuration for large uploads
+      PHP_INI_UPLOAD_MAX_FILESIZE: ${MAX_UPLOAD_SIZE:-512M}
+      PHP_INI_POST_MAX_SIZE: ${MAX_UPLOAD_SIZE:-512M}
+      PHP_INI_MEMORY_LIMIT: ${PHP_MEMORY_LIMIT:-512M}
+      PHP_INI_MAX_EXECUTION_TIME: ${PHP_MAX_EXECUTION_TIME:-600}
+      PHP_INI_MAX_INPUT_TIME: ${PHP_MAX_EXECUTION_TIME:-600}
+      WORDPRESS_DB_HOST: db
+      WORDPRESS_DB_USER: wordpress
+      WORDPRESS_DB_PASSWORD: wordpress
+      WORDPRESS_DB_NAME: wordpress
+      # Set WordPress site URL and home URL
+      WORDPRESS_SITEURL: ${WORDPRESS_SITEURL:-http://localhost:8090}
+      WORDPRESS_HOME: ${WORDPRESS_HOME:-http://localhost:8090}
+      # WordPress admin credentials
+      WP_ADMIN_USER: ${WP_ADMIN_USER:-admin}
+      WP_ADMIN_PASSWORD: ${WP_ADMIN_PASSWORD:-password123}
+      WP_ADMIN_EMAIL: ${WP_ADMIN_EMAIL:-admin@example.com}
+      WP_SITE_TITLE: ${WP_SITE_TITLE:-My WordPress Site}
+      WP_ACTIVE_THEME: ${WP_ACTIVE_THEME:-etch-theme}
+      # Plugin license keys
+      WPVIVID_LICENSE_KEY: ${WPVIVID_LICENSE_KEY:-}
+      WPVIVID_DBMERGE_LICENSE_KEY: ${WPVIVID_DBMERGE_LICENSE_KEY:-}
+      # Debug settings
+      WP_DEBUG: ${WP_DEBUG:-false}
+      WP_DEBUG_LOG: ${WP_DEBUG_LOG:-false}
+      WP_DEBUG_DISPLAY: ${WP_DEBUG_DISPLAY:-false}
+      WORDPRESS_CONFIG_EXTRA: |
+        /* Core Configuration */
+        define('WP_REDIS_HOST', 'redis');
+        define('WP_REDIS_PORT', 6379);
+        define('WP_SITEURL', '${WORDPRESS_SITEURL:-http://localhost:8090}');
+        define('WP_HOME', '${WORDPRESS_HOME:-http://localhost:8090}');
+        define('WP_DEBUG', ${WP_DEBUG:-false});
+        define('WP_DEBUG_LOG', ${WP_DEBUG_LOG:-false});
+        define('WP_DEBUG_DISPLAY', ${WP_DEBUG_DISPLAY:-false});
+
+        /* Memory and Upload Limits */
+        define('WP_MEMORY_LIMIT', '${PHP_MEMORY_LIMIT:-512M}');
+        define('WP_MAX_MEMORY_LIMIT', '${PHP_MEMORY_LIMIT:-512M}');
+
+        /* WPVivid License Keys */
+        if ('${WPVIVID_LICENSE_KEY:-}' !== '') {
+            define('WPVIVID_LICENSE_KEY', '${WPVIVID_LICENSE_KEY:-}');
+        }
+        if ('${WPVIVID_DBMERGE_LICENSE_KEY:-}' !== '') {
+            define('WPVIVID_DBMERGE_LICENSE_KEY', '${WPVIVID_DBMERGE_LICENSE_KEY:-}');
+        }
+
+        /* Custom Configuration from .env */
+        ${WP_CONFIG_EXTRA:-}
+    volumes:
+      - wordpress_data:/var/www/html
+      # Mount local plugins/themes to temp locations for one-way copy
+      - ./plugins:/local-plugins:ro
+      - ./themes:/local-themes:ro
+      # Mount initialization script
+      - ./docker-entrypoint-initwp.d:/docker-entrypoint-initwp.d:ro
+      # Mount custom entrypoint wrapper
+      - ./docker-entrypoint-wrapper.sh:/usr/local/bin/docker-entrypoint-wrapper.sh:ro
+      # Mount PHP configuration for uploads
+      - ./php-uploads.ini:/usr/local/etc/php/conf.d/uploads.ini:ro
+      # Mount PHP info page
+      - ./phpinfo.php:/var/www/html/phpinfo.php:ro
+    entrypoint: ["/usr/local/bin/docker-entrypoint-wrapper.sh"]
+    command: ["apache2-foreground"]
+
+  redis:
+    image: redis:7-alpine
+    command: redis-server --appendonly yes
+    volumes:
+      - redis_data:/data
+
+  db:
+    image: mysql:8.0
+    ports:
+      - "3334:3306"
+    environment:
+      MYSQL_DATABASE: wordpress
+      MYSQL_USER: wordpress
+      MYSQL_PASSWORD: wordpress
+      MYSQL_RANDOM_ROOT_PASSWORD: '1'
+    volumes:
+      - db_data:/var/lib/mysql
+
+volumes:
+  wordpress_data:
+  redis_data:
+  db_data:

@@ -1,5 +1,47 @@
-.DS_Store
+# Environment files
 .env
-.env.*
+.env.local
+.env.*.local
+.claude/
+CLAUDE.md
+
+# WordPress plugins and themes (keep gitkeep files)
+plugins/*
+!plugins/.gitkeep
+themes/*
+!themes/.gitkeep
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE files
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Logs
 *.log
-docker-compose.override.yml
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Docker volumes (if running locally)
+wordpress_data/
+db_data/
+redis_data/
+
+# Backup files
+*.sql
+*.tar.gz
+*.zip
+*~
+*.bak
+
+# WordPress specific
+wp-config.php
+wp-content/uploads/
+wp-content/cache/
+wp-content/upgrade/
+wp-content/backups/

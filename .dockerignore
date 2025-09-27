@@ -1,9 +1,8 @@
+# Docker ignore file to prevent accidental deletion
 .git
-.github
 .gitignore
 *.md
-LICENSE
+.env.example
 .DS_Store
-docker-compose*.yml
-.env
-.env.*
+node_modules/
+*.log
