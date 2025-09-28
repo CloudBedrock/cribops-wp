@@ -1,5 +1,13 @@
 FROM cloudbedrock/cribops-wp:latest
 
+# Install image optimization tools for EWWW Image Optimizer
+RUN apt-get update && apt-get install -y \
+    gifsicle \
+    optipng \
+    libjpeg-turbo-progs \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+
 # Copy plugins from local directory to the image
 COPY --chown=www-data:www-data ./plugins /var/www/html/wp-content/plugins/custom
 
