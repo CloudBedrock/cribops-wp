@@ -2,8 +2,13 @@ FROM cloudbedrock/cribops-wp:latest
 
 # Install image optimization tools for EWWW Image Optimizer
 RUN apt-get update && apt-get install -y \
+    zip \
+    unzip \
     gifsicle \
     optipng \
+    wget \
+    curl \
+    vim \
     libjpeg-turbo-progs \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
