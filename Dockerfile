@@ -39,6 +39,22 @@ RUN if [ -d /var/www/html/wp-content/themes/custom ]; then \
         done \
     fi
 
-# Ensure correct permissions
+# Create uploads directory structure with proper permissions
+RUN mkdir -p /var/www/html/wp-content/uploads \
+    && mkdir -p /var/www/html/wp-content/uploads/$(date +%Y)/$(date +%m) \
+    && chown -R www-data:www-data /var/www/html/wp-content/uploads \
+    && chmod -R 775 /var/www/html/wp-content/uploads
+
+# Ensure correct permissions for all custom content
 RUN chown -R www-data:www-data /var/www/html/wp-content/plugins/custom || true \
-    && chown -R www-data:www-data /var/www/html/wp-content/themes/custom || true
+    && chown -R www-data:www-data /var/www/html/wp-content/themes/custom || true \
+    && chown -R www-data:www-data /var/www/html/wp-content/ \
+    && find /var/www/html/wp-content -type d -exec chmod 755 {} \; \
+    && find /var/www/html/wp-content -type f -exec chmod 644 {} \;
+
+# Copy custom entrypoint script
+COPY --chmod=755 docker-entrypoint.sh /usr/local/bin/docker-entrypoint-custom.sh
+
+# Set custom entrypoint
+ENTRYPOINT ["/usr/local/bin/docker-entrypoint-custom.sh"]
+CMD ["apache2-foreground"]
