@@ -1,6 +1,8 @@
 services:
   wordpress:
     image: cribops-wp:test
+    entrypoint: ["docker-php-entrypoint"]
+    command: ["apache2-foreground"]
     depends_on:
       db:
         condition: service_healthy
