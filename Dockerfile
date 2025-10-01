@@ -115,6 +115,10 @@ COPY --chmod=755 docker-entrypoint.sh /usr/local/bin/docker-entrypoint-custom.sh
 
 WORKDIR /var/www/html
 
+# Health check to ensure WordPress is responding
+HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
+    CMD curl -f http://localhost/ || exit 1
+
 # Set custom entrypoint
 ENTRYPOINT ["/usr/local/bin/docker-entrypoint-custom.sh"]
 CMD ["apache2-foreground"]

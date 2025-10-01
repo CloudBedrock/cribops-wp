@@ -54,11 +54,56 @@ jobs:
           echo "version=$RAW_VERSION" >> $GITHUB_OUTPUT
 
   # -----------------------------------------------------------------------------
-  # 2) Build and push AMD64 image
+  # 2) Test the image before pushing
+  # -----------------------------------------------------------------------------
+  test:
+    runs-on: ubuntu-latest
+    needs: extract-version
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: docker/setup-buildx-action@v3
+
+      - name: Build test image
+        run: |
+          echo "Building test image..."
+          docker buildx build \
+            --platform linux/amd64 \
+            --load \
+            -t cribops-wp:test \
+            -f Dockerfile .
+
+      - name: Start test environment
+        run: |
+          echo "Starting WordPress test stack..."
+          docker compose -f compose.test.yml up -d
+
+      - name: Run tests
+        run: |
+          echo "Running integration tests..."
+          chmod +x tests/test.sh
+          ./tests/test.sh
+
+      - name: Show logs on failure
+        if: failure()
+        run: |
+          echo "=== WordPress logs ==="
+          docker compose -f compose.test.yml logs wordpress
+          echo "=== Redis logs ==="
+          docker compose -f compose.test.yml logs redis
+          echo "=== Database logs ==="
+          docker compose -f compose.test.yml logs db
+
+      - name: Cleanup test environment
+        if: always()
+        run: docker compose -f compose.test.yml down -v
+
+  # -----------------------------------------------------------------------------
+  # 3) Build and push AMD64 image (only if tests pass)
   # -----------------------------------------------------------------------------
   build-amd64:
     runs-on: ubuntu-latest
-    needs: extract-version
+    needs: [extract-version, test]
     steps:
       - uses: actions/checkout@v4
 
@@ -84,11 +129,11 @@ jobs:
             -f Dockerfile .
 
   # -----------------------------------------------------------------------------
-  # 3) Build and push ARM64 image
+  # 4) Build and push ARM64 image (only if tests pass)
   # -----------------------------------------------------------------------------
   build-arm64:
     runs-on: [self-hosted, macOS, ARM64]
-    needs: extract-version
+    needs: [extract-version, test]
     timeout-minutes: 60  # Overall job timeout
     steps:
       - uses: actions/checkout@v4
@@ -152,7 +197,7 @@ jobs:
           push_with_retry "docker.io/cloudbedrock/cribops-wp:latest-arm64"
 
   # -----------------------------------------------------------------------------
-  # 4) Create multi-arch manifest for the specific version and for :latest on both registries
+  # 5) Create multi-arch manifest for the specific version and for :latest on both registries
   # -----------------------------------------------------------------------------
   manifest:
     runs-on: ubuntu-latest
