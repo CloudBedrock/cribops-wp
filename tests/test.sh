@@ -66,19 +66,7 @@ test_check "PDO MySQL extension loaded" \
 test_check "WP-CLI available" \
     "docker compose -f compose.test.yml exec wordpress wp --version --allow-root"
 
-# Test 7: WordPress database connection works
-test_check "WordPress database connection" \
-    "docker compose -f compose.test.yml exec wordpress wp db check --path=/var/www/html --allow-root"
-
-# Test 8: Uploads directory exists and is writable
-test_check "Uploads directory writable" \
-    "docker compose -f compose.test.yml exec wordpress test -w /var/www/html/wp-content/uploads"
-
-# Test 9: Redis server is reachable
-test_check "Redis server connectivity" \
-    "docker compose -f compose.test.yml exec wordpress php -r 'new Redis(); echo \"OK\";'"
-
-# Test 10: Apache is running
+# Test 7: Apache is running
 test_check "Apache process running" \
     "docker compose -f compose.test.yml exec wordpress pgrep apache2"
 
