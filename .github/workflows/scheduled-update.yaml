@@ -25,32 +25,30 @@ jobs:
       - name: Check for updates
         id: check
         run: |
-          # Get latest WordPress version info from Docker Hub
-          LATEST_WP_TAG=$(curl -s https://hub.docker.com/v2/repositories/library/wordpress/tags/?page_size=10 | \
-            jq -r '.results[] | select(.name == "latest") | .name')
+          # Get latest WordPress version by pulling the image and checking version.php
+          docker pull wordpress:latest >/dev/null 2>&1
+          LATEST_WP_VERSION=$(docker run --rm wordpress:latest cat /usr/src/wordpress/wp-includes/version.php | grep '$wp_version =' | cut -d"'" -f2)
 
-          # Get the PHP version from latest tag
-          LATEST_PHP_INFO=$(curl -s https://hub.docker.com/v2/repositories/library/wordpress/tags/?page_size=10 | \
-            jq -r '.results[] | select(.name == "latest") | .aliases[]' | \
-            grep -E 'php[0-9]+\.[0-9]+' | \
-            head -1)
+          # Get current WordPress version from Dockerfile
+          CURRENT_WP_VERSION=$(grep "FROM wordpress:" Dockerfile | cut -d':' -f2)
 
-          # Extract PHP version
-          if [[ -n "$LATEST_PHP_INFO" ]]; then
-            PHP_VERSION=$(echo "$LATEST_PHP_INFO" | grep -oE '[0-9]+\.[0-9]+')
-          else
-            PHP_VERSION="8.3"  # Default fallback
+          # Get PHP version from latest tag
+          LATEST_PHP_INFO=$(curl -s https://hub.docker.com/v2/repositories/library/wordpress/tags/?page_size=50 | \
+            jq -r ".results[] | select(.name == \"$LATEST_WP_VERSION\") | .images[0].architecture" | head -1)
+
+          # Default PHP version
+          PHP_VERSION="8.3"
+
+          echo "Current WordPress version in Dockerfile: $CURRENT_WP_VERSION"
+          echo "Latest WordPress version available: $LATEST_WP_VERSION"
+          echo "PHP version: $PHP_VERSION"
+
+          # Check if update is needed
+          NEEDS_UPDATE=false
+          if [[ "$CURRENT_WP_VERSION" != "$LATEST_WP_VERSION" ]]; then
+            echo "WordPress version mismatch - update needed"
+            NEEDS_UPDATE=true
           fi
-
-          # Get current base image from Dockerfile
-          CURRENT_BASE=$(grep "FROM wordpress:" Dockerfile | cut -d' ' -f2)
-
-          echo "Current base image: $CURRENT_BASE"
-          echo "Latest WordPress: $LATEST_WP_TAG (PHP $PHP_VERSION)"
-
-          # For this workflow, we always check if there are security updates
-          # by forcing a rebuild weekly
-          NEEDS_UPDATE=true
 
           # Force build if requested
           if [[ "${{ github.event.inputs.force_build }}" == "true" ]]; then
@@ -59,7 +57,7 @@ jobs:
           fi
 
           echo "needs_update=$NEEDS_UPDATE" >> $GITHUB_OUTPUT
-          echo "wordpress_version=$LATEST_WP_TAG" >> $GITHUB_OUTPUT
+          echo "wordpress_version=$LATEST_WP_VERSION" >> $GITHUB_OUTPUT
           echo "php_version=$PHP_VERSION" >> $GITHUB_OUTPUT
 
   update-and-build:
@@ -70,6 +68,24 @@ jobs:
       - uses: actions/checkout@v4
         with:
           token: ${{ secrets.GH_PAT }}
+
+      - name: Update Dockerfile with new WordPress version
+        run: |
+          WP_VERSION="${{ needs.check-updates.outputs.wordpress_version }}"
+          echo "Updating Dockerfile to WordPress $WP_VERSION"
+          sed -i "s/FROM wordpress:.*/FROM wordpress:$WP_VERSION/" Dockerfile
+
+          # Check if there are changes
+          if git diff --quiet Dockerfile; then
+            echo "No changes to Dockerfile"
+          else
+            echo "Dockerfile updated"
+            git config user.name "github-actions[bot]"
+            git config user.email "github-actions[bot]@users.noreply.github.com"
+            git add Dockerfile
+            git commit -m "Update WordPress to version $WP_VERSION"
+            git push
+          fi
 
       - name: Create release tag
         run: |

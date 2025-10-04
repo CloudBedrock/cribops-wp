@@ -68,6 +68,7 @@ jobs:
         run: |
           echo "Building test image..."
           docker buildx build \
+            --pull \
             --platform linux/amd64 \
             --load \
             -t cribops-wp:test \
@@ -120,6 +121,7 @@ jobs:
           VERSION="${{ needs.extract-version.outputs.version }}"
           echo "Building AMD64 image with version = $VERSION"
           docker buildx build \
+            --pull \
             --platform linux/amd64 \
             --push \
             -t ghcr.io/cloudbedrock/cribops-wp:${VERSION}-amd64 \
@@ -152,6 +154,7 @@ jobs:
           VERSION="${{ needs.extract-version.outputs.version }}"
           echo "Building ARM64 image with version = $VERSION"
           docker buildx build \
+            --pull \
             --platform linux/arm64 \
             --output type=docker \
             -t ghcr.io/cloudbedrock/cribops-wp:${VERSION}-arm64 \

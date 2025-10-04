@@ -1,5 +1,5 @@
 # syntax=docker/dockerfile:1
-FROM wordpress:latest
+FROM wordpress:6.8.3
 
 LABEL maintainer="CloudBedrock <support@cloudbedrock.com>"
 LABEL description="WordPress with Redis, optimized PHP settings, and Object Cache Pro support"
