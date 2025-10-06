@@ -55,20 +55,6 @@ else
     fi
 fi
 
-# Delete default WordPress plugins
-echo -e "${YELLOW}Removing default WordPress plugins...${NC}"
-# Remove Akismet
-if wp plugin is-installed akismet --path=/var/www/html --allow-root 2>/dev/null; then
-    echo -e "${GREEN}Deleting plugin: Akismet${NC}"
-    wp plugin delete akismet --path=/var/www/html --allow-root
-fi
-
-# Remove Hello Dolly
-if wp plugin is-installed hello --path=/var/www/html --allow-root 2>/dev/null; then
-    echo -e "${GREEN}Deleting plugin: Hello Dolly${NC}"
-    wp plugin delete hello --path=/var/www/html --allow-root
-fi
-
 # Install and activate custom plugins
 echo -e "${YELLOW}Checking for custom plugins...${NC}"
 # Check for plugins copied from local directory
