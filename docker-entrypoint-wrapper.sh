@@ -37,6 +37,24 @@ if [ -d /local-themes ]; then
     done
 fi
 
+# Copy local mu-plugins to container (one-way sync)
+if [ -d /local-mu-plugins ]; then
+    echo "Copying local mu-plugins to WordPress..."
+    mkdir -p /var/www/html/wp-content/mu-plugins
+    for file in /local-mu-plugins/*; do
+        if [ -e "$file" ]; then
+            filename=$(basename "$file")
+            if [ ! -e "/var/www/html/wp-content/mu-plugins/$filename" ]; then
+                echo "  - Copying mu-plugin: $filename"
+                cp -r "$file" "/var/www/html/wp-content/mu-plugins/$filename"
+                chown -R www-data:www-data "/var/www/html/wp-content/mu-plugins/$filename"
+            else
+                echo "  - MU-plugin already exists: $filename (skipping)"
+            fi
+        fi
+    done
+fi
+
 # Run the initialization script in the background after a delay
 (
     # Wait for Apache and WordPress to be ready

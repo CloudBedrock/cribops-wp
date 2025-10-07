@@ -62,6 +62,7 @@ services:
       # Mount local plugins/themes to temp locations for one-way copy
       - ./plugins:/local-plugins:ro
       - ./themes:/local-themes:ro
+      - ./mu-plugins:/local-mu-plugins:ro
       # Mount initialization script
       - ./docker-entrypoint-initwp.d:/docker-entrypoint-initwp.d:ro
       # Mount custom entrypoint wrapper

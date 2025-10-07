@@ -1,0 +1,9 @@
+# Place must-use plugins (mu-plugins) here
+#
+# Must-use plugins are automatically loaded by WordPress
+# They do not need to be activated and load before regular plugins
+#
+# Examples:
+# - Single file plugins: place the .php file directly here
+# - Plugin directories: place the entire plugin folder here, and create
+#   a loader file in this directory that requires the main plugin file
