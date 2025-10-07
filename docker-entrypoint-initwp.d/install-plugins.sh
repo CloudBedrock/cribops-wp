@@ -119,38 +119,6 @@ if wp plugin is-installed redis-cache --path=/var/www/html --allow-root 2>/dev/n
     wp redis enable --path=/var/www/html --allow-root
 fi
 
-# Activate WPVivid Backup Pro license if provided
-if [ -n "${WPVIVID_LICENSE_KEY}" ] && [ "${WPVIVID_LICENSE_KEY}" != "" ]; then
-    echo -e "${GREEN}Activating WPVivid Backup Pro license...${NC}"
-
-    # WPVivid stores license in WordPress options
-    wp option update wpvivid_common_setting --format=json '{"license_key":"'${WPVIVID_LICENSE_KEY}'","license_status":"active"}' --path=/var/www/html --allow-root 2>/dev/null || true
-
-    # Also try using WP-CLI to set the option directly
-    wp eval "update_option('wpvivid_license_key', '${WPVIVID_LICENSE_KEY}');" --path=/var/www/html --allow-root 2>/dev/null || true
-    wp eval "update_option('wpvivid_backup_pro_license_key', '${WPVIVID_LICENSE_KEY}');" --path=/var/www/html --allow-root 2>/dev/null || true
-
-    echo -e "${GREEN}✓ WPVivid Backup Pro license key configured${NC}"
-else
-    echo -e "${YELLOW}No WPVivid Backup Pro license key provided${NC}"
-fi
-
-# Activate WPVivid Database Merge license if provided
-if [ -n "${WPVIVID_DBMERGE_LICENSE_KEY}" ] && [ "${WPVIVID_DBMERGE_LICENSE_KEY}" != "" ]; then
-    echo -e "${GREEN}Activating WPVivid Database Merge license...${NC}"
-
-    # Set the database merge license key in WordPress options
-    wp eval "update_option('wpvivid_dbmerge_license_key', '${WPVIVID_DBMERGE_LICENSE_KEY}');" --path=/var/www/html --allow-root 2>/dev/null || true
-    wp eval "update_option('wpvivid_database_merge_license_key', '${WPVIVID_DBMERGE_LICENSE_KEY}');" --path=/var/www/html --allow-root 2>/dev/null || true
-
-    # Also try the common setting format
-    wp option update wpvivid_dbmerge_setting --format=json '{"license_key":"'${WPVIVID_DBMERGE_LICENSE_KEY}'","license_status":"active"}' --path=/var/www/html --allow-root 2>/dev/null || true
-
-    echo -e "${GREEN}✓ WPVivid Database Merge license key configured${NC}"
-else
-    echo -e "${YELLOW}No WPVivid Database Merge license key provided${NC}"
-fi
-
 echo -e "${GREEN}========================================${NC}"
 echo -e "${GREEN}WordPress initialization complete!${NC}"
 echo -e "${GREEN}========================================${NC}"
