@@ -41,6 +41,7 @@ fi
 if [ -d /local-mu-plugins ]; then
     echo "Copying local mu-plugins to WordPress..."
     mkdir -p /var/www/html/wp-content/mu-plugins
+    chown www-data:www-data /var/www/html/wp-content/mu-plugins
     for file in /local-mu-plugins/*; do
         if [ -e "$file" ]; then
             filename=$(basename "$file")
