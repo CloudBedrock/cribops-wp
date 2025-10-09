@@ -56,6 +56,14 @@ if [ -d /local-mu-plugins ]; then
     done
 fi
 
+# Create cribops-wp-kit directory in uploads with proper permissions
+if [ -d /var/www/html/wp-content/uploads ]; then
+    echo "Creating cribops-wp-kit directory in uploads..."
+    mkdir -p /var/www/html/wp-content/uploads/cribops-wp-kit
+    chown -R www-data:www-data /var/www/html/wp-content/uploads/cribops-wp-kit
+    chmod -R 775 /var/www/html/wp-content/uploads/cribops-wp-kit
+fi
+
 # Run the initialization script in the background after a delay
 (
     # Wait for Apache and WordPress to be ready
