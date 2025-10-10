@@ -26,6 +26,11 @@ Production-ready WordPress Docker image and complete development environment wit
 - 📊 **PHP Info Page** - Built-in phpinfo page for debugging
 - 🔄 **Auto-activation** - Plugins and themes automatically activated on startup
 
+### Development Tools (Optional)
+- 📧 **MailPit** - SMTP email testing with web UI (no real emails sent)
+- 🌐 **ngrok** - Secure tunneling for sharing local sites remotely
+- 🔒 **SSL Support** - Ready for HTTPS development with self-signed certificates
+
 ## Quick Start
 
 ### Using Docker Compose (Recommended for Development)
@@ -166,6 +171,58 @@ cribops-wp/
 │   └── your-theme/
 ├── Dockerfile                      # Custom build (optional)
 └── CLAUDE.md                       # AI assistant instructions
+```
+
+## Development Tools
+
+### MailPit - Email Testing
+
+MailPit captures all emails sent from WordPress so you can test email functionality without sending real emails.
+
+```bash
+# Start MailPit
+docker compose --profile mailpit up -d
+
+# Access MailPit Web UI
+open http://localhost:8025
+```
+
+**Configuration:**
+- SMTP Host: `mailpit` (from within WordPress container)
+- SMTP Port: `1025`
+- Web UI: http://localhost:8025
+
+Use an SMTP plugin like [WP Mail SMTP](https://wordpress.org/plugins/wp-mail-smtp/) to configure WordPress to use MailPit.
+
+### ngrok - Secure Tunneling
+
+Share your local WordPress site with clients or test webhooks from external services.
+
+```bash
+# Set your ngrok auth token in .env
+NGROK_AUTHTOKEN=your_token_here
+
+# Start ngrok
+docker compose --profile ngrok up -d
+
+# Get your public URL
+open http://localhost:4040
+```
+
+Your local site will be accessible at a public ngrok URL (e.g., `https://abc123.ngrok.io`).
+
+**WordPress Integration:**
+- Visit the "Development Tools" page in CribOps WP-Kit admin to get the current ngrok URL
+- Copy the URL for sharing with clients or testing webhooks
+
+### Running Multiple Development Tools
+
+```bash
+# Start WordPress with MailPit and ngrok
+docker compose --profile mailpit --profile ngrok up -d
+
+# Stop development tools
+docker compose --profile mailpit --profile ngrok down
 ```
 
 ## Common Commands

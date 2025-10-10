@@ -44,6 +44,11 @@ services:
         define('WP_MEMORY_LIMIT', '${PHP_MEMORY_LIMIT:-512M}');
         define('WP_MAX_MEMORY_LIMIT', '${PHP_MEMORY_LIMIT:-512M}');
 
+        /* MailPit SMTP Configuration */
+        define('MAILPIT_SMTP_HOST', 'mailpit');
+        define('MAILPIT_SMTP_PORT', 1025);
+        define('MAILPIT_WEB_UI', 'http://localhost:8025');
+
         /* Custom Configuration from .env */
         ${WP_CONFIG_EXTRA:-}
     volumes:
@@ -80,6 +85,37 @@ services:
       MYSQL_RANDOM_ROOT_PASSWORD: '1'
     volumes:
       - db_data:/var/lib/mysql
+
+  mailpit:
+    image: axllent/mailpit:latest
+    container_name: mailpit
+    restart: unless-stopped
+    ports:
+      - "8025:8025"  # Web UI
+      - "1025:1025"  # SMTP server
+    environment:
+      MP_SMTP_AUTH_ACCEPT_ANY: 1
+      MP_SMTP_AUTH_ALLOW_INSECURE: 1
+    profiles:
+      - mailpit
+
+  ngrok:
+    image: ngrok/ngrok:latest
+    container_name: ngrok
+    restart: unless-stopped
+    command:
+      - "http"
+      - "--host-header=rewrite"
+      - "wordpress:80"
+    ports:
+      - "4040:4040"  # ngrok web UI
+    environment:
+      NGROK_AUTHTOKEN: ${NGROK_AUTHTOKEN:-}
+      NGROK_REGION: ${NGROK_REGION:-us}
+    profiles:
+      - ngrok
+    depends_on:
+      - wordpress
 
 volumes:
   wordpress_data:
