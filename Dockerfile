@@ -17,7 +17,7 @@ RUN set -ex; \
         gifsicle \
         optipng \
         wget \
-        libjpeg-progs; \
+        libjpeg-progs || apt-get install -y libjpeg-turbo-progs; \
     pecl install igbinary; \
     pecl install --configureoptions 'enable-redis-igbinary="yes" enable-redis-zstd="yes"' redis; \
     pecl install apcu; \
