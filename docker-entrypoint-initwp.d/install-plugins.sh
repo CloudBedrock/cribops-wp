@@ -66,10 +66,13 @@ chown -R www-data:www-data /var/www/html/wp-content/uploads/cribops-wp-kit 2>/de
 chmod -R 755 /var/www/html/wp-content/uploads/cribops-wp-kit 2>/dev/null || true
 echo -e "${GREEN}✓ Upload directories ownership fixed${NC}"
 
-# Install cribops-wp-kit from GitHub if not present
-echo -e "${YELLOW}Checking for cribops-wp-kit plugin...${NC}"
-if [ ! -d "/var/www/html/wp-content/plugins/cribops-wp-kit" ]; then
-    echo -e "${GREEN}Downloading cribops-wp-kit from GitHub...${NC}"
+# Install cribops-wp-kit from GitHub as MU-plugin if not present
+echo -e "${YELLOW}Checking for cribops-wp-kit MU-plugin...${NC}"
+if [ ! -d "/var/www/html/wp-content/mu-plugins/cribops-wp-kit" ]; then
+    echo -e "${GREEN}Downloading cribops-wp-kit from GitHub as MU-plugin...${NC}"
+
+    # Ensure mu-plugins directory exists
+    mkdir -p /var/www/html/wp-content/mu-plugins
 
     # Get the latest release download URL
     LATEST_RELEASE=$(curl -s https://api.github.com/repos/CloudBedrock/cribops-wp-kit/releases/latest | grep "zipball_url" | cut -d '"' -f 4)
@@ -86,10 +89,10 @@ if [ ! -d "/var/www/html/wp-content/plugins/cribops-wp-kit" ]; then
         EXTRACTED_DIR=$(find /tmp -maxdepth 1 -type d -name "CloudBedrock-cribops-wp-kit-*" | head -n 1)
 
         if [ -n "$EXTRACTED_DIR" ]; then
-            # Move to plugins directory
-            mv "$EXTRACTED_DIR" /var/www/html/wp-content/plugins/cribops-wp-kit
-            chown -R www-data:www-data /var/www/html/wp-content/plugins/cribops-wp-kit
-            echo -e "${GREEN}✓ cribops-wp-kit installed successfully${NC}"
+            # Move to mu-plugins directory
+            mv "$EXTRACTED_DIR" /var/www/html/wp-content/mu-plugins/cribops-wp-kit
+            chown -R www-data:www-data /var/www/html/wp-content/mu-plugins/cribops-wp-kit
+            echo -e "${GREEN}✓ cribops-wp-kit installed as MU-plugin successfully${NC}"
         else
             echo -e "${RED}✗ Failed to extract cribops-wp-kit${NC}"
         fi
@@ -100,19 +103,37 @@ if [ ! -d "/var/www/html/wp-content/plugins/cribops-wp-kit" ]; then
         echo -e "${YELLOW}Could not fetch latest release, attempting to clone from main branch...${NC}"
 
         # Fallback to cloning the repository
-        git clone --depth 1 https://github.com/CloudBedrock/cribops-wp-kit.git /var/www/html/wp-content/plugins/cribops-wp-kit
+        git clone --depth 1 https://github.com/CloudBedrock/cribops-wp-kit.git /var/www/html/wp-content/mu-plugins/cribops-wp-kit
 
         if [ $? -eq 0 ]; then
-            chown -R www-data:www-data /var/www/html/wp-content/plugins/cribops-wp-kit
+            chown -R www-data:www-data /var/www/html/wp-content/mu-plugins/cribops-wp-kit
             # Remove .git directory to save space
-            rm -rf /var/www/html/wp-content/plugins/cribops-wp-kit/.git
-            echo -e "${GREEN}✓ cribops-wp-kit cloned successfully${NC}"
+            rm -rf /var/www/html/wp-content/mu-plugins/cribops-wp-kit/.git
+            echo -e "${GREEN}✓ cribops-wp-kit cloned as MU-plugin successfully${NC}"
         else
             echo -e "${RED}✗ Failed to install cribops-wp-kit${NC}"
         fi
     fi
+
+    # Create MU-plugin loader file if the plugin has a main file
+    if [ -f "/var/www/html/wp-content/mu-plugins/cribops-wp-kit/cribops-wp-kit.php" ]; then
+        echo -e "${GREEN}Creating MU-plugin loader for cribops-wp-kit...${NC}"
+        cat > /var/www/html/wp-content/mu-plugins/cribops-wp-kit-loader.php <<'EOF'
+<?php
+/**
+ * Plugin Name: CribOps WP Kit Loader
+ * Description: Must-use plugin loader for CribOps WP Kit
+ * Version: 1.0
+ * Author: CloudBedrock
+ */
+
+require_once WPMU_PLUGIN_DIR . '/cribops-wp-kit/cribops-wp-kit.php';
+EOF
+        chown www-data:www-data /var/www/html/wp-content/mu-plugins/cribops-wp-kit-loader.php
+        echo -e "${GREEN}✓ MU-plugin loader created${NC}"
+    fi
 else
-    echo -e "${YELLOW}cribops-wp-kit already installed${NC}"
+    echo -e "${YELLOW}cribops-wp-kit MU-plugin already installed${NC}"
 fi
 
 # Install and activate custom plugins
