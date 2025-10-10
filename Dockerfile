@@ -6,8 +6,10 @@ LABEL description="WordPress with Redis, optimized PHP settings, and Object Cach
 
 # Install system dependencies
 RUN set -ex; \
+    apt-get clean; \
+    rm -rf /var/cache/apt/archives/* /var/lib/apt/lists/*; \
     apt-get update; \
-    apt-get install -y \
+    apt-get install -y --no-install-recommends \
         libzstd-dev \
         libzstd1 \
         vim \
@@ -20,7 +22,7 @@ RUN set -ex; \
         wget \
         libjpeg-progs; \
     apt-get clean; \
-    rm -rf /var/lib/apt/lists/*
+    rm -rf /var/cache/apt/archives/* /var/lib/apt/lists/*
 
 # Install PECL extensions
 RUN set -ex; \
