@@ -270,6 +270,29 @@ brew install nss  # for Firefox support
    - HTTP: http://mysite.local:8090
    - HTTPS: https://mysite.local:8443
 
+**Optional: Use Standard Port 443 (macOS)**
+
+To access your site at `https://mysite.local` without specifying port 8443:
+
+```bash
+# Setup port forwarding 443 → 8443
+./scripts/setup-port-forwarding.sh
+
+# Update .env to remove port from URLs
+WORDPRESS_SITEURL=https://mysite.local
+WORDPRESS_HOME=https://mysite.local
+
+# Restart containers
+docker compose restart wordpress
+```
+
+Now access at: https://mysite.local
+
+To remove port forwarding later:
+```bash
+./scripts/remove-port-forwarding.sh
+```
+
 **Note:** For Linux/Windows, manually add entries to `/etc/hosts` or `C:\Windows\System32\drivers\etc\hosts`:
 ```
 127.0.0.1  mysite.local
