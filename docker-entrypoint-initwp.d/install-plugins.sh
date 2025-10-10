@@ -66,6 +66,55 @@ chown -R www-data:www-data /var/www/html/wp-content/uploads/cribops-wp-kit 2>/de
 chmod -R 755 /var/www/html/wp-content/uploads/cribops-wp-kit 2>/dev/null || true
 echo -e "${GREEN}✓ Upload directories ownership fixed${NC}"
 
+# Install cribops-wp-kit from GitHub if not present
+echo -e "${YELLOW}Checking for cribops-wp-kit plugin...${NC}"
+if [ ! -d "/var/www/html/wp-content/plugins/cribops-wp-kit" ]; then
+    echo -e "${GREEN}Downloading cribops-wp-kit from GitHub...${NC}"
+
+    # Get the latest release download URL
+    LATEST_RELEASE=$(curl -s https://api.github.com/repos/CloudBedrock/cribops-wp-kit/releases/latest | grep "zipball_url" | cut -d '"' -f 4)
+
+    if [ -n "$LATEST_RELEASE" ]; then
+        echo -e "${GREEN}Found latest release, downloading...${NC}"
+
+        # Download and extract the plugin
+        cd /tmp
+        curl -L -o cribops-wp-kit.zip "$LATEST_RELEASE"
+        unzip -q cribops-wp-kit.zip
+
+        # Find the extracted directory (GitHub creates a dir with format: CloudBedrock-cribops-wp-kit-{commit})
+        EXTRACTED_DIR=$(find /tmp -maxdepth 1 -type d -name "CloudBedrock-cribops-wp-kit-*" | head -n 1)
+
+        if [ -n "$EXTRACTED_DIR" ]; then
+            # Move to plugins directory
+            mv "$EXTRACTED_DIR" /var/www/html/wp-content/plugins/cribops-wp-kit
+            chown -R www-data:www-data /var/www/html/wp-content/plugins/cribops-wp-kit
+            echo -e "${GREEN}✓ cribops-wp-kit installed successfully${NC}"
+        else
+            echo -e "${RED}✗ Failed to extract cribops-wp-kit${NC}"
+        fi
+
+        # Cleanup
+        rm -f /tmp/cribops-wp-kit.zip
+    else
+        echo -e "${YELLOW}Could not fetch latest release, attempting to clone from main branch...${NC}"
+
+        # Fallback to cloning the repository
+        git clone --depth 1 https://github.com/CloudBedrock/cribops-wp-kit.git /var/www/html/wp-content/plugins/cribops-wp-kit
+
+        if [ $? -eq 0 ]; then
+            chown -R www-data:www-data /var/www/html/wp-content/plugins/cribops-wp-kit
+            # Remove .git directory to save space
+            rm -rf /var/www/html/wp-content/plugins/cribops-wp-kit/.git
+            echo -e "${GREEN}✓ cribops-wp-kit cloned successfully${NC}"
+        else
+            echo -e "${RED}✗ Failed to install cribops-wp-kit${NC}"
+        fi
+    fi
+else
+    echo -e "${YELLOW}cribops-wp-kit already installed${NC}"
+fi
+
 # Install and activate custom plugins
 echo -e "${YELLOW}Checking for custom plugins...${NC}"
 # Check for plugins copied from local directory
