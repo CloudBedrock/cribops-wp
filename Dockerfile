@@ -4,11 +4,12 @@ FROM wordpress:6.8.3
 LABEL maintainer="CloudBedrock <support@cloudbedrock.com>"
 LABEL description="WordPress with Redis, optimized PHP settings, and Object Cache Pro support"
 
-# Install Redis extension with dependencies and debugging tools
+# Install system dependencies
 RUN set -ex; \
     apt-get update; \
     apt-get install -y \
         libzstd-dev \
+        libzstd1 \
         vim \
         less \
         curl \
@@ -17,14 +18,18 @@ RUN set -ex; \
         gifsicle \
         optipng \
         wget \
-        libjpeg-progs || apt-get install -y libjpeg-turbo-progs; \
+        libjpeg-progs; \
+    apt-get clean; \
+    rm -rf /var/lib/apt/lists/*
+
+# Install PECL extensions
+RUN set -ex; \
     pecl install igbinary; \
     pecl install --configureoptions 'enable-redis-igbinary="yes" enable-redis-zstd="yes"' redis; \
     pecl install apcu; \
     docker-php-ext-enable igbinary redis apcu; \
     docker-php-ext-install -j$(nproc) pdo pdo_mysql mysqli bcmath sockets; \
-    apt-get clean; \
-    rm -rf /var/lib/apt/lists/* /tmp/pear
+    rm -rf /tmp/pear
 
 # Install WP-CLI
 RUN curl -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar \
