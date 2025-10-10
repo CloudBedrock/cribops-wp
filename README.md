@@ -215,6 +215,66 @@ Your local site will be accessible at a public ngrok URL (e.g., `https://abc123.
 - Visit the "Development Tools" page in CribOps WP-Kit admin to get the current ngrok URL
 - Copy the URL for sharing with clients or testing webhooks
 
+### SSL Certificates - Local HTTPS Development
+
+Develop with trusted HTTPS connections using self-signed certificates.
+
+**Requirements:**
+- [mkcert](https://github.com/FiloSottile/mkcert) - Simple tool for making locally-trusted development certificates
+
+**macOS Installation:**
+```bash
+brew install mkcert
+brew install nss  # for Firefox support
+```
+
+**Setup Instructions:**
+
+1. **Generate SSL Certificates**
+   ```bash
+   # Create certificates for your .local domain
+   ./scripts/setup-ssl.sh mysite.local
+   ```
+   This creates trusted certificates for:
+   - `mysite.local`
+   - `*.mysite.local` (wildcard for subdomains)
+   - `localhost`
+   - `127.0.0.1`
+
+2. **Setup Local DNS (macOS only)**
+   ```bash
+   # Configure DNS resolver for .local domains
+   ./scripts/setup-local-dns.sh mysite.local
+   ```
+   This allows all `*.local` domains to resolve to `127.0.0.1` without editing `/etc/hosts`.
+
+3. **Update .env Configuration**
+   ```env
+   SERVER_NAME=mysite.local
+   WORDPRESS_SITEURL=https://mysite.local:8443
+   WORDPRESS_HOME=https://mysite.local:8443
+   ```
+
+4. **Restart Containers**
+   ```bash
+   docker compose down
+   docker compose up -d
+   ```
+
+5. **Enable SSL in Apache**
+   ```bash
+   ./scripts/enable-ssl.sh
+   ```
+
+6. **Access Your Site**
+   - HTTP: http://mysite.local:8090
+   - HTTPS: https://mysite.local:8443
+
+**Note:** For Linux/Windows, manually add entries to `/etc/hosts` or `C:\Windows\System32\drivers\etc\hosts`:
+```
+127.0.0.1  mysite.local
+```
+
 ### Running Multiple Development Tools
 
 ```bash

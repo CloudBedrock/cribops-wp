@@ -6,7 +6,9 @@ services:
       - redis
     ports:
       - "8090:80"
+      - "8443:443"  # HTTPS port
     environment:
+      SERVER_NAME: ${SERVER_NAME:-localhost}
       # PHP Configuration for large uploads
       PHP_INI_UPLOAD_MAX_FILESIZE: ${MAX_UPLOAD_SIZE:-512M}
       PHP_INI_POST_MAX_SIZE: ${MAX_UPLOAD_SIZE:-512M}
@@ -65,6 +67,10 @@ services:
       - ./php-uploads.ini:/usr/local/etc/php/conf.d/uploads.ini:ro
       # Mount PHP info page
       - ./phpinfo.php:/var/www/html/phpinfo.php:ro
+      # Mount SSL certificates (optional - create with ./scripts/setup-ssl.sh)
+      - ./ssl:/etc/ssl/certs:ro
+      # Mount Apache SSL config (optional)
+      - ./apache-ssl.conf:/etc/apache2/sites-available/default-ssl.conf:ro
     entrypoint: ["/usr/local/bin/docker-entrypoint-wrapper.sh"]
     command: ["apache2-foreground"]
 
