@@ -55,6 +55,17 @@ else
     fi
 fi
 
+# Fix ownership issues: ensure all wp-content directories are owned by www-data
+# This prevents "Failed to move downloaded file" errors when plugins try to create/move files
+echo -e "${GREEN}Fixing wp-content ownership...${NC}"
+chown -R www-data:www-data /var/www/html/wp-content/uploads 2>/dev/null || true
+
+# Pre-create the cribops-wp-kit directory with correct ownership
+mkdir -p /var/www/html/wp-content/uploads/cribops-wp-kit
+chown -R www-data:www-data /var/www/html/wp-content/uploads/cribops-wp-kit 2>/dev/null || true
+chmod -R 755 /var/www/html/wp-content/uploads/cribops-wp-kit 2>/dev/null || true
+echo -e "${GREEN}✓ Upload directories ownership fixed${NC}"
+
 # Install and activate custom plugins
 echo -e "${YELLOW}Checking for custom plugins...${NC}"
 # Check for plugins copied from local directory
