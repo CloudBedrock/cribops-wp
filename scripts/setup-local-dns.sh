@@ -29,10 +29,25 @@ if [ ! -d /etc/resolver ]; then
     sudo mkdir -p /etc/resolver
 fi
 
-# Create resolver file for the TLD
-RESOLVER_FILE="/etc/resolver/$TLD"
-echo "📝 Creating resolver file: $RESOLVER_FILE"
-echo "nameserver 127.0.0.1" | sudo tee "$RESOLVER_FILE" > /dev/null
+# For .local TLD, we need to use /etc/hosts instead of resolver
+# macOS resolver files require a real DNS server, not just 127.0.0.1
+if [ "$TLD" = "local" ]; then
+    echo "📝 Adding $DOMAIN to /etc/hosts..."
+
+    # Check if entry already exists
+    if grep -q "$DOMAIN" /etc/hosts; then
+        echo "ℹ️  Entry already exists in /etc/hosts"
+    else
+        # Add entry
+        echo "127.0.0.1  $DOMAIN" | sudo tee -a /etc/hosts > /dev/null
+        echo "✅ Added $DOMAIN to /etc/hosts"
+    fi
+else
+    # For other TLDs, use resolver file (requires DNS server)
+    RESOLVER_FILE="/etc/resolver/$TLD"
+    echo "📝 Creating resolver file: $RESOLVER_FILE"
+    echo "nameserver 127.0.0.1" | sudo tee "$RESOLVER_FILE" > /dev/null
+fi
 
 echo ""
 echo "✅ DNS resolver configured!"
