@@ -423,7 +423,7 @@ For issues and feature requests, please visit: https://github.com/CloudBedrock/c
 
 ## License
 
-This Docker configuration is open source and available under the MIT License.
+This Docker configuration is open source and available under the GNU General Public License v2 or later (GPL-2.0-or-later), matching WordPress's license. See the [LICENSE](LICENSE) file for details.
 
 ## Credits
 
