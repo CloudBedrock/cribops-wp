@@ -5,7 +5,7 @@ services:
       - db
       - redis
     ports:
-      - "8090:80"
+      - "8007:80"
       - "8443:443"  # HTTPS port
     environment:
       SERVER_NAME: ${SERVER_NAME:-localhost}
@@ -20,8 +20,8 @@ services:
       WORDPRESS_DB_PASSWORD: wordpress
       WORDPRESS_DB_NAME: wordpress
       # Set WordPress site URL and home URL
-      WORDPRESS_SITEURL: ${WORDPRESS_SITEURL:-http://localhost:8090}
-      WORDPRESS_HOME: ${WORDPRESS_HOME:-http://localhost:8090}
+      WORDPRESS_SITEURL: ${WORDPRESS_SITEURL:-http://localhost:8007}
+      WORDPRESS_HOME: ${WORDPRESS_HOME:-http://localhost:8007}
       # WordPress admin credentials
       WP_ADMIN_USER: ${WP_ADMIN_USER:-admin}
       WP_ADMIN_PASSWORD: ${WP_ADMIN_PASSWORD:-password123}
@@ -83,7 +83,7 @@ services:
   db:
     image: mysql:8.0
     ports:
-      - "3334:3306"
+      - "3309:3306"
     environment:
       MYSQL_DATABASE: wordpress
       MYSQL_USER: wordpress
