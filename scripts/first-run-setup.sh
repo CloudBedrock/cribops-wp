@@ -59,15 +59,7 @@ echo ""
 # Step 2: Generate SSL certificates
 echo -e "${BLUE}[2/7]${NC} Generating SSL certificates for ${DOMAIN}..."
 if [ -f "./ssl/cert.pem" ] && [ -f "./ssl/key.pem" ]; then
-    echo -e "${YELLOW}⚠️  SSL certificates already exist${NC}"
-    read -p "   Regenerate certificates? (y/N): " -n 1 -r
-    echo
-    if [[ $REPLY =~ ^[Yy]$ ]]; then
-        rm -rf ./ssl
-        "$SCRIPT_DIR/setup-ssl.sh" "$DOMAIN"
-    else
-        echo -e "${GREEN}✅ Using existing certificates${NC}"
-    fi
+    echo -e "${GREEN}✅ SSL certificates already exist (using existing)${NC}"
 else
     "$SCRIPT_DIR/setup-ssl.sh" "$DOMAIN"
 fi
@@ -109,10 +101,24 @@ echo ""
 
 # Step 6: Wait for WordPress to be ready
 echo -e "${BLUE}[6/7]${NC} Waiting for WordPress to initialize..."
-echo -n "   "
+
+# First, wait for database to be ready
+echo -n "   Waiting for database"
 for i in {1..30}; do
-    if docker compose exec wordpress wp core is-installed --path=/var/www/html --allow-root 2>/dev/null; then
-        echo -e "\n${GREEN}✅ WordPress is ready${NC}"
+    if docker compose exec db mysqladmin ping -h localhost -u wordpress -pwordpress --silent >/dev/null 2>&1; then
+        echo -e " ${GREEN}✓${NC}"
+        break
+    fi
+    echo -n "."
+    sleep 2
+done
+
+# Then wait for WordPress to be installed
+echo -n "   Waiting for WordPress"
+for i in {1..30}; do
+    if docker compose exec wordpress wp core is-installed --path=/var/www/html --allow-root >/dev/null 2>&1; then
+        echo -e " ${GREEN}✓${NC}"
+        echo -e "${GREEN}✅ WordPress is ready${NC}"
         break
     fi
     echo -n "."
