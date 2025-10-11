@@ -219,84 +219,75 @@ Your local site will be accessible at a public ngrok URL (e.g., `https://abc123.
 
 Develop with trusted HTTPS connections using self-signed certificates.
 
-**Requirements:**
-- [mkcert](https://github.com/FiloSottile/mkcert) - Simple tool for making locally-trusted development certificates
+**Quick Setup (Recommended):**
 
-**macOS Installation:**
 ```bash
-brew install mkcert
-brew install nss  # for Firefox support
+# One-command setup (requires mkcert)
+./scripts/setup-ssl-complete.sh mysite.local
 ```
 
-**Setup Instructions:**
+This will:
+1. Check if mkcert is installed
+2. Generate SSL certificates
+3. Add domain to /etc/hosts
+4. Show you the next steps
 
-1. **Generate SSL Certificates**
+Then follow the printed instructions to:
+- Update your .env with the domain
+- Start Docker containers
+- Enable SSL in Apache
+- Access at https://mysite.local:8443
+
+**Manual Setup:**
+
+**Requirements:**
+- [mkcert](https://github.com/FiloSottile/mkcert) - Install with `brew install mkcert nss`
+
+**Steps:**
+
+1. **Run the complete setup script**
    ```bash
-   # Create certificates for your .local domain
-   ./scripts/setup-ssl.sh mysite.local
+   ./scripts/setup-ssl-complete.sh mysite.local
    ```
-   This creates trusted certificates for:
-   - `mysite.local`
-   - `*.mysite.local` (wildcard for subdomains)
-   - `localhost`
-   - `127.0.0.1`
 
-2. **Setup Local DNS (macOS only)**
-   ```bash
-   # Configure DNS resolver for .local domains
-   ./scripts/setup-local-dns.sh mysite.local
-   ```
-   This allows all `*.local` domains to resolve to `127.0.0.1` without editing `/etc/hosts`.
-
-3. **Update .env Configuration**
+2. **Update .env Configuration**
    ```env
    SERVER_NAME=mysite.local
    WORDPRESS_SITEURL=https://mysite.local:8443
    WORDPRESS_HOME=https://mysite.local:8443
    ```
 
-4. **Restart Containers**
+3. **Start Containers**
    ```bash
-   docker compose down
    docker compose up -d
    ```
 
-5. **Enable SSL in Apache**
+4. **Enable SSL in Apache**
    ```bash
    ./scripts/enable-ssl.sh
    ```
 
-6. **Access Your Site**
-   - HTTP: http://mysite.local:8090
+5. **Access Your Site**
    - HTTPS: https://mysite.local:8443
+   - HTTP: http://mysite.local:8090
 
-**Optional: Use Standard Port 443 (macOS)**
+**Advanced: Use Port 443 (Optional)**
 
-To access your site at `https://mysite.local` without specifying port 8443:
+If you want to access via standard port 443 (`https://mysite.local` instead of `:8443`):
 
 ```bash
-# Setup port forwarding 443 → 8443
+# Setup port forwarding (macOS only)
 ./scripts/setup-port-forwarding.sh
 
-# Update .env to remove port from URLs
+# Update .env to remove port
 WORDPRESS_SITEURL=https://mysite.local
 WORDPRESS_HOME=https://mysite.local
 
-# Restart containers
+# Restart
 docker compose restart wordpress
 ```
 
-Now access at: https://mysite.local
-
-To remove port forwarding later:
-```bash
-./scripts/remove-port-forwarding.sh
-```
-
-**Note:** For Linux/Windows, manually add entries to `/etc/hosts` or `C:\Windows\System32\drivers\etc\hosts`:
-```
-127.0.0.1  mysite.local
-```
+Remove with: `./scripts/remove-port-forwarding.sh`
 
 ### Running Multiple Development Tools
 
