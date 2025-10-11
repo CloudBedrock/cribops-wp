@@ -68,7 +68,7 @@ services:
       # Mount PHP info page
       - ./phpinfo.php:/var/www/html/phpinfo.php:ro
       # Mount SSL certificates (optional - create with ./scripts/setup-ssl.sh)
-      - ./ssl:/etc/ssl/certs:ro
+      - ./ssl:/etc/ssl/wordpress:ro
       # Mount Apache SSL config (optional)
       - ./apache-ssl.conf:/etc/apache2/sites-available/default-ssl.conf:ro
     entrypoint: ["/usr/local/bin/docker-entrypoint-wrapper.sh"]
