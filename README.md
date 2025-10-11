@@ -33,7 +33,17 @@ Production-ready WordPress Docker image and complete development environment wit
 
 ## Quick Start
 
-### Using Docker Compose (Recommended for Development)
+### 🚀 Fastest Way: One-Command Setup
+
+```bash
+./scripts/first-run-setup.sh
+```
+
+This automatically handles SSL certificates, DNS configuration, and container startup. **Your WordPress site will be running at https://wpdemo.local:8443 in under 2 minutes!**
+
+See [QUICK_START.md](QUICK_START.md) for complete quick start guide.
+
+### Manual Setup (Alternative)
 
 1. **Clone this repository**
    ```bash
