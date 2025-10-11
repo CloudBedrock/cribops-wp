@@ -20,6 +20,7 @@ RUN set -ex; \
         gifsicle \
         optipng \
         wget \
+        git \
         libjpeg-progs; \
     apt-get clean; \
     rm -rf /var/cache/apt/archives/* /var/lib/apt/lists/*
