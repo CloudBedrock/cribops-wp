@@ -41,10 +41,11 @@ Production-ready WordPress Docker image and complete development environment wit
    cd cribops-wp
    ```
 
-2. **Create your `.env` file**
+2. **Create your configuration files**
    ```bash
    cp .env.example .env
-   # Edit .env with your settings
+   cp compose.yml.example compose.yml
+   # Edit .env and compose.yml with your settings
    ```
 
 3. **Add your plugins and themes**
@@ -57,7 +58,7 @@ Production-ready WordPress Docker image and complete development environment wit
    ```
 
 5. **Access WordPress**
-   - Site URL: Configured in `.env` (default: http://localhost:8090)
+   - Site URL: Configured in `.env` (default: http://localhost:8080)
    - Admin URL: /wp-admin
    - Credentials: Configured in `.env`
 
@@ -135,13 +136,13 @@ Benefits:
 
 ### Services
 
-1. **WordPress** (Port 8090)
+1. **WordPress** (Port 8080, HTTPS 8443)
    - Image: cloudbedrock/cribops-wp:latest
    - PHP 8.3 with Apache
    - WP-CLI pre-installed
    - Auto-installation on first run
 
-2. **MySQL 8.0** (Port 3334)
+2. **MySQL 8.0** (Port 3306)
    - Database: wordpress
    - User: wordpress
    - Password: wordpress
@@ -156,7 +157,8 @@ Benefits:
 
 ```
 cribops-wp/
-├── compose.yml                      # Docker Compose configuration
+├── compose.yml.example              # Docker Compose template
+├── compose.yml                      # Your Docker config (not in git)
 ├── .env.example                     # Environment template
 ├── .env                            # Your configuration (not in git)
 ├── docker-entrypoint-wrapper.sh    # Custom entrypoint
@@ -359,9 +361,9 @@ docker compose exec wordpress wp cache flush --path=/var/www/html --allow-root
 ## Troubleshooting
 
 ### Port Conflicts
-If ports 8090 or 3334 are in use (e.g., Laravel Herd):
+If ports 8080 or 3306 are in use (e.g., Laravel Herd):
 1. Stop the conflicting service, or
-2. Change ports in `compose.yml`
+2. Change ports in your local `compose.yml`
 
 ### Plugins Not Activating
 1. Check plugin folder name matches exactly

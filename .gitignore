@@ -3,6 +3,9 @@ ssl/
 .env
 .env.local
 .env.*.local
+
+# Docker Compose files
+compose.yml
 .claude/
 CLAUDE.md
 

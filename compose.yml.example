@@ -5,7 +5,7 @@ services:
       - db
       - redis
     ports:
-      - "8007:80"
+      - "8080:80"
       - "8443:443"  # HTTPS port
     environment:
       SERVER_NAME: ${SERVER_NAME:-localhost}
@@ -20,8 +20,8 @@ services:
       WORDPRESS_DB_PASSWORD: wordpress
       WORDPRESS_DB_NAME: wordpress
       # Set WordPress site URL and home URL
-      WORDPRESS_SITEURL: ${WORDPRESS_SITEURL:-http://localhost:8007}
-      WORDPRESS_HOME: ${WORDPRESS_HOME:-http://localhost:8007}
+      WORDPRESS_SITEURL: ${WORDPRESS_SITEURL:-http://localhost:8080}
+      WORDPRESS_HOME: ${WORDPRESS_HOME:-http://localhost:8080}
       # WordPress admin credentials
       WP_ADMIN_USER: ${WP_ADMIN_USER:-admin}
       WP_ADMIN_PASSWORD: ${WP_ADMIN_PASSWORD:-password123}
@@ -36,8 +36,8 @@ services:
         /* Core Configuration */
         define('WP_REDIS_HOST', 'redis');
         define('WP_REDIS_PORT', 6379);
-        define('WP_SITEURL', '${WORDPRESS_SITEURL:-http://localhost:8090}');
-        define('WP_HOME', '${WORDPRESS_HOME:-http://localhost:8090}');
+        define('WP_SITEURL', '${WORDPRESS_SITEURL:-http://localhost:8080}');
+        define('WP_HOME', '${WORDPRESS_HOME:-http://localhost:8080}');
         define('WP_DEBUG', ${WP_DEBUG:-false});
         define('WP_DEBUG_LOG', ${WP_DEBUG_LOG:-false});
         define('WP_DEBUG_DISPLAY', ${WP_DEBUG_DISPLAY:-false});
@@ -83,7 +83,7 @@ services:
   db:
     image: mysql:8.0
     ports:
-      - "3309:3306"
+      - "3306:3306"
     environment:
       MYSQL_DATABASE: wordpress
       MYSQL_USER: wordpress
