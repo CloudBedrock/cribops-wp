@@ -14,14 +14,30 @@ YELLOW='\033[1;33m'
 RED='\033[0;31m'
 NC='\033[0m' # No Color
 
-# Default domain
-DEFAULT_DOMAIN="wpdemo.local"
-DOMAIN="${1:-$DEFAULT_DOMAIN}"
-
 echo -e "${BLUE}╔════════════════════════════════════════════════════════╗${NC}"
 echo -e "${BLUE}║  WordPress Development Environment - First Run Setup  ║${NC}"
 echo -e "${BLUE}╚════════════════════════════════════════════════════════╝${NC}"
 echo ""
+
+# Prompt for domain if not provided as argument
+if [ -z "$1" ]; then
+    echo -e "${BLUE}Enter your local domain name${NC}"
+    echo -e "   Must use .local TLD (e.g., mysite.local, wpdemo.local)"
+    echo ""
+    read -p "   Domain [wpdemo.local]: " DOMAIN
+    DOMAIN="${DOMAIN:-wpdemo.local}"
+    echo ""
+else
+    DOMAIN="$1"
+fi
+
+# Validate .local TLD
+if [[ ! "$DOMAIN" =~ \.local$ ]]; then
+    echo -e "${RED}❌ Error: Domain must use .local TLD${NC}"
+    echo -e "   Example: mysite.local, dev.local, wpdemo.local"
+    echo ""
+    exit 1
+fi
 
 # Check if running on macOS
 if [[ "$OSTYPE" != "darwin"* ]]; then
