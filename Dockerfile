@@ -21,6 +21,7 @@ RUN set -ex; \
         optipng \
         wget \
         git \
+        ca-certificates \
         libjpeg-progs; \
     apt-get clean; \
     rm -rf /var/cache/apt/archives/* /var/lib/apt/lists/*
