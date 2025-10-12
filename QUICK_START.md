@@ -68,10 +68,52 @@ docker compose --profile mailpit up -d
 Access at: http://localhost:8025
 
 ### Public Tunnel (ngrok)
+
+**Start ngrok:**
 ```bash
 docker compose --profile ngrok up -d
 ```
-Dashboard: http://localhost:4040
+
+**Get your public URL:**
+
+Option 1 - Web Dashboard:
+```bash
+open http://localhost:4040
+```
+
+Option 2 - Command Line:
+```bash
+curl -s http://localhost:4040/api/tunnels | grep -o 'https://[^"]*\.ngrok-free\.dev'
+```
+
+**Update WordPress to use ngrok URL:**
+```bash
+# Replace with your actual ngrok URL from above
+NGROK_URL="https://your-subdomain.ngrok-free.dev"
+
+docker compose exec wordpress wp option update siteurl "$NGROK_URL" --path=/var/www/html --allow-root
+docker compose exec wordpress wp option update home "$NGROK_URL" --path=/var/www/html --allow-root
+```
+
+**For paid ngrok accounts with custom domains:**
+
+1. Set your reserved domain in `compose.yml`:
+
+```yaml
+ngrok:
+  command:
+    - "http"
+    - "wordpress:80"
+    - "--domain=your-custom-domain.ngrok.app"
+```
+
+Your URL will always be: `https://your-custom-domain.ngrok.app`
+
+**Switch back to local development:**
+```bash
+docker compose exec wordpress wp option update siteurl "https://wpdemo.local:8443" --path=/var/www/html --allow-root
+docker compose exec wordpress wp option update home "https://wpdemo.local:8443" --path=/var/www/html --allow-root
+```
 
 ## Troubleshooting
 
