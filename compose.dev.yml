@@ -1,0 +1,23 @@
+services:
+  wordpress:
+    # Override volumes for local development with direct bind mounts
+    volumes:
+      - wordpress_data:/var/www/html
+      # Direct two-way bind mounts for local editing
+      - ./plugins:/var/www/html/wp-content/plugins:delegated
+      - ./themes:/var/www/html/wp-content/themes:delegated
+      - ./mu-plugins:/var/www/html/wp-content/mu-plugins:delegated
+      # Keep other mounts as-is
+      - ./docker-entrypoint-initwp.d:/docker-entrypoint-initwp.d:ro
+      - ./docker-entrypoint-wrapper.sh:/usr/local/bin/docker-entrypoint-wrapper.sh:ro
+      - ./php-uploads.ini:/usr/local/etc/php/conf.d/uploads.ini:ro
+      - ./phpinfo.php:/var/www/html/phpinfo.php:ro
+      - ./ssl:/etc/ssl/wordpress:ro
+      - ./apache-ssl.conf:/etc/apache2/sites-available/default-ssl.conf:ro
+    entrypoint: ["docker-entrypoint.sh"]  # Use standard entrypoint (no copying needed)
+    command: ["apache2-foreground"]
+
+volumes:
+  wordpress_data:
+  redis_data:
+  db_data:

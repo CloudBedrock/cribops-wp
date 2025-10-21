@@ -36,6 +36,24 @@ Your WordPress site will be running in under 2 minutes! This command handles SSL
 
 **See [QUICK_START.md](QUICK_START.md) for the complete setup guide and daily usage instructions.**
 
+## Local Development
+
+Want to edit plugins/themes with VSCode or Cursor? See [LOCAL-EDITING.md](LOCAL-EDITING.md) for:
+
+- **Development Mode**: Direct two-way bind mounts for instant code changes
+- **Production Mode**: One-way sync (default) for deployment testing
+- Switching between modes and troubleshooting
+
+**Quick Start for Local Editing:**
+
+```bash
+# Start in development mode (instant two-way sync)
+docker compose -f compose.yml -f compose.dev.yml up -d
+
+# Edit files in plugins/, themes/, or mu-plugins/ with your editor
+# Changes appear instantly in WordPress!
+```
+
 ## Using Docker Image Directly
 
 ```bash
