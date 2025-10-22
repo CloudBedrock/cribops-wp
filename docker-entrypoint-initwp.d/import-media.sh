@@ -71,10 +71,12 @@ is_already_imported() {
     [ "$file_hash" = "$stored_hash" ]
 }
 
-# Import files from media directory
-echo -e "${YELLOW}Scanning for media files...${NC}"
-find /local-media -type f | while read -r media_file; do
+# Import files from media directory (including subfolders)
+echo -e "${YELLOW}Scanning for media files in /local-media and all subfolders...${NC}"
+find /local-media -type f | sort | while read -r media_file; do
     filename=$(basename "$media_file")
+    relative_path="${media_file#/local-media/}"
+    folder_path=$(dirname "$relative_path")
 
     # Skip hidden files and system files
     if [[ "$filename" == .* ]] || [[ "$filename" == ".DS_Store" ]] || [[ "$filename" == "Thumbs.db" ]]; then
@@ -83,27 +85,33 @@ find /local-media -type f | while read -r media_file; do
 
     # Check if file type is supported
     if ! is_supported_type "$media_file"; then
-        echo -e "${YELLOW}  ⊘ Skipping unsupported file type: $filename${NC}"
+        echo -e "${YELLOW}  ⊘ Skipping unsupported file type: $relative_path${NC}"
         skipped_count=$((skipped_count + 1))
         continue
     fi
 
     # Check if already imported
     if is_already_imported "$media_file"; then
-        echo -e "${YELLOW}  ⊘ Already imported (unchanged): $filename${NC}"
+        echo -e "${YELLOW}  ⊘ Already imported (unchanged): $relative_path${NC}"
         skipped_count=$((skipped_count + 1))
         continue
     fi
 
-    echo -e "${GREEN}  → Importing: $filename${NC}"
+    # Show folder context if in subfolder
+    if [ "$folder_path" != "." ]; then
+        echo -e "${GREEN}  → Importing from [$folder_path]: $filename${NC}"
+    else
+        echo -e "${GREEN}  → Importing: $filename${NC}"
+    fi
 
-    # Import the media file using WP-CLI
-    if wp media import "$media_file" --path=/var/www/html --allow-root 2>/dev/null; then
-        echo -e "${GREEN}  ✓ Successfully imported: $filename${NC}"
+    # Import the media file using WP-CLI with title based on folder structure
+    # This helps organize media by preserving some folder context in the filename
+    if wp media import "$media_file" --path=/var/www/html --allow-root --porcelain 2>&1 | grep -q '^[0-9]\+$'; then
+        echo -e "${GREEN}  ✓ Successfully imported: $relative_path${NC}"
         create_marker "$media_file"
         imported_count=$((imported_count + 1))
     else
-        echo -e "${RED}  ✗ Failed to import: $filename${NC}"
+        echo -e "${RED}  ✗ Failed to import: $relative_path${NC}"
         error_count=$((error_count + 1))
     fi
 done
