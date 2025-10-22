@@ -1,0 +1,16 @@
+# Keep this directory but ignore all files except this .gitignore
+*
+!.gitignore
+
+# This folder is for direct file copy to WordPress uploads directory
+# Useful for restoring missing files that are already referenced in the database
+#
+# Structure your files to match WordPress uploads structure:
+# Example:
+#   media-copy/
+#     2024/
+#       01/
+#         image.jpg
+#     2024/
+#       02/
+#         photo.png

@@ -8,6 +8,7 @@ services:
       - ./themes:/var/www/html/wp-content/themes:delegated
       - ./mu-plugins:/var/www/html/wp-content/mu-plugins:delegated
       - ./media:/local-media:ro
+      - ./media-copy:/local-media-copy:ro
       # Keep other mounts as-is
       - ./docker-entrypoint-initwp.d:/docker-entrypoint-initwp.d:ro
       - ./docker-entrypoint-wrapper.sh:/usr/local/bin/docker-entrypoint-wrapper.sh:ro

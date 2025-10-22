@@ -75,6 +75,12 @@ fi
         /docker-entrypoint-initwp.d/install-plugins.sh
     fi
 
+    # Copy media files directly to uploads (for restoring missing files)
+    if [ -f /docker-entrypoint-initwp.d/copy-media.sh ]; then
+        echo "Running direct media copy script..."
+        /docker-entrypoint-initwp.d/copy-media.sh
+    fi
+
     # Import media files if the script exists
     if [ -f /docker-entrypoint-initwp.d/import-media.sh ]; then
         echo "Running media import script..."
