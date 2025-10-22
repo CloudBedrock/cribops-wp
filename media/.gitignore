@@ -1,0 +1,7 @@
+# Keep this directory but ignore all files except this .gitignore
+*
+!.gitignore
+
+# You can add specific files you want to track by adding exceptions like:
+# !example-image.jpg
+# !logo.png

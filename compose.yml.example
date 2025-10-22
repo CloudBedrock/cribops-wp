@@ -61,6 +61,7 @@ services:
       - ./plugins:/local-plugins:ro
       - ./themes:/local-themes:ro
       - ./mu-plugins:/local-mu-plugins:ro
+      - ./media:/local-media:ro
       # Mount initialization script
       - ./docker-entrypoint-initwp.d:/docker-entrypoint-initwp.d:ro
       # Mount custom entrypoint wrapper

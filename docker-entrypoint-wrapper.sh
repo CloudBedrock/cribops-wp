@@ -74,6 +74,12 @@ fi
         echo "Running WordPress initialization script..."
         /docker-entrypoint-initwp.d/install-plugins.sh
     fi
+
+    # Import media files if the script exists
+    if [ -f /docker-entrypoint-initwp.d/import-media.sh ]; then
+        echo "Running media import script..."
+        /docker-entrypoint-initwp.d/import-media.sh
+    fi
 ) &
 
 # Execute the original entrypoint
